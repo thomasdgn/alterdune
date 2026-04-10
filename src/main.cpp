@@ -2,13 +2,15 @@
 
 #include <iostream>
 
+using namespace std;
+
 int main()
 {
     Game game;
 
     if (!game.initialize())
     {
-        std::cerr << "ALTERDUNE could not start correctly.\n";
+        cerr << "ALTERDUNE could not start correctly.\n";
         return 1;
     }
 

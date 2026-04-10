@@ -1,16 +1,18 @@
 #include "BestiaryEntry.h"
 
-BestiaryEntry::BestiaryEntry(const std::string& name,
+using namespace std;
+
+BestiaryEntry::BestiaryEntry(const string& name,
                              MonsterCategory category,
                              int maxHp,
                              int atk,
                              int def,
-                             const std::string& result)
+                             const string& result)
     : m_name(name), m_category(category), m_maxHp(maxHp), m_atk(atk), m_def(def), m_result(result)
 {
 }
 
-const std::string& BestiaryEntry::getName() const
+const string& BestiaryEntry::getName() const
 {
     return m_name;
 }
@@ -35,7 +37,7 @@ int BestiaryEntry::getDef() const
     return m_def;
 }
 
-const std::string& BestiaryEntry::getResult() const
+const string& BestiaryEntry::getResult() const
 {
     return m_result;
 }

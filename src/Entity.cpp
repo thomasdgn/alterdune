@@ -3,17 +3,19 @@
 #include <algorithm>
 #include <iostream>
 
-Entity::Entity(const std::string& name, int maxHp, int atk, int def)
+using namespace std;
+
+Entity::Entity(const string& name, int maxHp, int atk, int def)
     : m_name(name), m_hp(maxHp), m_maxHp(maxHp), m_atk(atk), m_def(def)
 {
 }
 
-std::string Entity::getEntityType() const
+string Entity::getEntityType() const
 {
     return "Entity";
 }
 
-void Entity::printStatus(std::ostream& os) const
+void Entity::printStatus(ostream& os) const
 {
     os << getEntityType() << " - " << m_name << " | HP: " << m_hp << "/" << m_maxHp
        << " | ATK: " << m_atk << " | DEF: " << m_def;
@@ -21,8 +23,8 @@ void Entity::printStatus(std::ostream& os) const
 
 void Entity::takeDamage(int rawDamage)
 {
-    const int effectiveDamage = std::max(1, rawDamage - m_def);
-    m_hp = std::max(0, m_hp - effectiveDamage);
+    const int effectiveDamage = max(1, rawDamage - m_def);
+    m_hp = max(0, m_hp - effectiveDamage);
 }
 
 void Entity::heal(int amount)
@@ -32,7 +34,7 @@ void Entity::heal(int amount)
         return;
     }
 
-    m_hp = std::min(m_maxHp, m_hp + amount);
+    m_hp = min(m_maxHp, m_hp + amount);
 }
 
 bool Entity::isAlive() const
@@ -40,7 +42,7 @@ bool Entity::isAlive() const
     return m_hp > 0;
 }
 
-const std::string& Entity::getName() const
+const string& Entity::getName() const
 {
     return m_name;
 }
@@ -65,28 +67,28 @@ int Entity::getDef() const
     return m_def;
 }
 
-void Entity::setName(const std::string& name)
+void Entity::setName(const string& name)
 {
     m_name = name;
 }
 
 void Entity::setHp(int hp)
 {
-    m_hp = std::clamp(hp, 0, m_maxHp);
+    m_hp = clamp(hp, 0, m_maxHp);
 }
 
 void Entity::setMaxHp(int maxHp)
 {
-    m_maxHp = std::max(1, maxHp);
-    m_hp = std::min(m_hp, m_maxHp);
+    m_maxHp = max(1, maxHp);
+    m_hp = min(m_hp, m_maxHp);
 }
 
 void Entity::setAtk(int atk)
 {
-    m_atk = std::max(0, atk);
+    m_atk = max(0, atk);
 }
 
 void Entity::setDef(int def)
 {
-    m_def = std::max(0, def);
+    m_def = max(0, def);
 }

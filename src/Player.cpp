@@ -2,17 +2,19 @@
 
 #include <iostream>
 
-Player::Player(const std::string& name, int maxHp, int atk, int def)
+using namespace std;
+
+Player::Player(const string& name, int maxHp, int atk, int def)
     : Entity(name, maxHp, atk, def), m_kills(0), m_spares(0), m_victories(0)
 {
 }
 
-std::string Player::getEntityType() const
+string Player::getEntityType() const
 {
     return "Player";
 }
 
-void Player::printStatus(std::ostream& os) const
+void Player::printStatus(ostream& os) const
 {
     os << getName() << " | HP: " << getHp() << "/" << getMaxHp()
        << " | ATK: " << getAtk()
@@ -33,17 +35,17 @@ void Player::addItem(const Item& item)
     m_inventory.push_back(item);
 }
 
-std::vector<Item>& Player::getInventory()
+vector<Item>& Player::getInventory()
 {
     return m_inventory;
 }
 
-const std::vector<Item>& Player::getInventory() const
+const vector<Item>& Player::getInventory() const
 {
     return m_inventory;
 }
 
-void Player::displayStats(std::ostream& os) const
+void Player::displayStats(ostream& os) const
 {
     os << "=== Player Stats ===\n";
     printStatus(os);
@@ -53,7 +55,7 @@ void Player::displayStats(std::ostream& os) const
        << "\nInventory slots: " << m_inventory.size() << "\n";
 }
 
-void Player::displayItems(std::ostream& os) const
+void Player::displayItems(ostream& os) const
 {
     os << "=== Items ===\n";
     if (m_inventory.empty())
@@ -62,7 +64,7 @@ void Player::displayItems(std::ostream& os) const
         return;
     }
 
-    for (std::size_t i = 0; i < m_inventory.size(); ++i)
+    for (size_t i = 0; i < m_inventory.size(); ++i)
     {
         const Item& item = m_inventory[i];
         os << i + 1 << ". " << item.getName()
@@ -72,7 +74,7 @@ void Player::displayItems(std::ostream& os) const
     }
 }
 
-bool Player::useItem(std::size_t index, std::ostream& os)
+bool Player::useItem(size_t index, ostream& os)
 {
     if (index >= m_inventory.size())
     {

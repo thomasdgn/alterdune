@@ -2,12 +2,14 @@
 
 #include <algorithm>
 
-Item::Item(const std::string& name, ItemType type, int value, int quantity)
-    : m_name(name), m_type(type), m_value(std::max(0, value)), m_quantity(std::max(0, quantity))
+using namespace std;
+
+Item::Item(const string& name, ItemType type, int value, int quantity)
+    : m_name(name), m_type(type), m_value(max(0, value)), m_quantity(max(0, quantity))
 {
 }
 
-const std::string& Item::getName() const
+const string& Item::getName() const
 {
     return m_name;
 }
@@ -29,12 +31,12 @@ int Item::getQuantity() const
 
 void Item::setQuantity(int quantity)
 {
-    m_quantity = std::max(0, quantity);
+    m_quantity = max(0, quantity);
 }
 
 void Item::addQuantity(int amount)
 {
-    m_quantity = std::max(0, m_quantity + amount);
+    m_quantity = max(0, m_quantity + amount);
 }
 
 bool Item::consumeOne()
@@ -48,7 +50,7 @@ bool Item::consumeOne()
     return true;
 }
 
-ItemType Item::itemTypeFromString(const std::string& value)
+ItemType Item::itemTypeFromString(const string& value)
 {
     if (value == "HEAL")
     {
@@ -58,7 +60,7 @@ ItemType Item::itemTypeFromString(const std::string& value)
     return ItemType::UNKNOWN;
 }
 
-std::string Item::itemTypeToString(ItemType type)
+string Item::itemTypeToString(ItemType type)
 {
     switch (type)
     {
