@@ -1,0 +1,27 @@
+ALTERDUNE - Battle Mockup
+
++------------------------------------------------------------+
+| Sunken Mire                                                |
+|                                                            |
+|                              [ Monster Sprite ]            |
+|                              QueenByte   BOSS              |
+|                              HP  63 / 80                  |
+|                              Mercy 72 / 100               |
+|                                                            |
+| [ Player Sprite ]                                          |
+| Traveler                                                   |
+| HP  88 / 110                                               |
+| Bonus: Fight +2, Guard x1                                  |
+|                                                            |
++------------------------------------------------------------+
+| "QueenByte pauses to consider your argument. Logic works." |
+| Hint: She respects wit, reason and spectacle.              |
++------------------------------------------------------------+
+|   FIGHT   |   ACT   |   ITEM   |   MERCY                  |
++------------------------------------------------------------+
+
+UI notes:
+- grosses zones de texte
+- sprites bien separes
+- boutons massifs et lisibles
+- fond specifique a la region

@@ -21,20 +21,24 @@ void Entity::printStatus(ostream& os) const
        << " | ATK: " << m_atk << " | DEF: " << m_def;
 }
 
-void Entity::takeDamage(int rawDamage)
+int Entity::takeDamage(int rawDamage)
 {
     const int effectiveDamage = max(1, rawDamage - m_def);
+    const int previousHp = m_hp;
     m_hp = max(0, m_hp - effectiveDamage);
+    return previousHp - m_hp;
 }
 
-void Entity::heal(int amount)
+int Entity::heal(int amount)
 {
     if (amount <= 0)
     {
-        return;
+        return 0;
     }
 
+    const int previousHp = m_hp;
     m_hp = min(m_maxHp, m_hp + amount);
+    return m_hp - previousHp;
 }
 
 bool Entity::isAlive() const

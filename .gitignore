@@ -38,6 +38,12 @@ CMakeCache.txt
 cmake_install.cmake
 compile_commands.json
 
+# Local dependency managers
+vcpkg/
+
+# Raw imported asset packs
+assets/import/
+
 # Logs and temp files
 *.log
 *.err

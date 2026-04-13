@@ -13,8 +13,8 @@ public:
     virtual std::string getEntityType() const;
     virtual void printStatus(std::ostream& os) const;
 
-    void takeDamage(int rawDamage);
-    void heal(int amount);
+    int takeDamage(int rawDamage);
+    int heal(int amount);
     bool isAlive() const;
 
     const std::string& getName() const;

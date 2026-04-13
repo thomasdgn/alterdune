@@ -3,6 +3,7 @@
 
 #include "Entity.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -17,20 +18,24 @@ class Monster : public Entity
 {
 public:
     Monster(const std::string& name = "",
-            MonsterCategory category = MonsterCategory::NORMAL,
             int maxHp = 0,
             int atk = 0,
             int def = 0,
             int mercyGoal = 100,
             const std::vector<std::string>& actIds = {});
+    virtual ~Monster() = default;
 
     std::string getEntityType() const override;
     void printStatus(std::ostream& os) const override;
 
-    MonsterCategory getCategory() const;
+    virtual MonsterCategory getCategory() const = 0;
+    virtual int getMaxActChoices() const = 0;
+    virtual std::unique_ptr<Monster> clone() const = 0;
+
     int getMercy() const;
     int getMercyGoal() const;
     const std::vector<std::string>& getActIds() const;
+    std::vector<std::string> getAvailableActIds() const;
 
     void addMercy(int amount);
     bool isSpareable() const;
@@ -39,10 +44,54 @@ public:
     static std::string categoryToString(MonsterCategory category);
 
 private:
-    MonsterCategory m_category;
     int m_mercy;
     int m_mercyGoal;
     std::vector<std::string> m_actIds;
+};
+
+class NormalMonster : public Monster
+{
+public:
+    NormalMonster(const std::string& name = "",
+                  int maxHp = 0,
+                  int atk = 0,
+                  int def = 0,
+                  int mercyGoal = 100,
+                  const std::vector<std::string>& actIds = {});
+
+    MonsterCategory getCategory() const override;
+    int getMaxActChoices() const override;
+    std::unique_ptr<Monster> clone() const override;
+};
+
+class MiniBossMonster : public Monster
+{
+public:
+    MiniBossMonster(const std::string& name = "",
+                    int maxHp = 0,
+                    int atk = 0,
+                    int def = 0,
+                    int mercyGoal = 100,
+                    const std::vector<std::string>& actIds = {});
+
+    MonsterCategory getCategory() const override;
+    int getMaxActChoices() const override;
+    std::unique_ptr<Monster> clone() const override;
+};
+
+class BossMonster : public Monster
+{
+public:
+    BossMonster(const std::string& name = "",
+                int maxHp = 0,
+                int atk = 0,
+                int def = 0,
+                int mercyGoal = 100,
+                const std::vector<std::string>& actIds = {});
+
+    MonsterCategory getCategory() const override;
+    int getMaxActChoices() const override;
+    std::unique_ptr<Monster> clone() const override;
 };
 
 #endif

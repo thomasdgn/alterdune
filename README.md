@@ -22,12 +22,15 @@ alterdune/
 |-- data/
 |   |-- items.csv
 |   `-- monsters.csv
+|-- assets/
+|   `-- README.md
 |-- docs/
 |   `-- DESIGN.md
 |-- include/
 |   |-- ActAction.h
 |   |-- BestiaryEntry.h
 |   |-- Entity.h
+|   |-- FrontendViewModels.h
 |   |-- Game.h
 |   |-- Item.h
 |   |-- Monster.h
@@ -146,6 +149,88 @@ Sous Windows PowerShell, si besoin :
 .\alterdune.exe
 ```
 
+## Option 3 - Frontend SFML bonus
+
+Le projet contient maintenant un premier frontend bonus avec :
+
+- une fenetre SFML
+- un choix de langue au demarrage du frontend (`English` / `Francais`)
+- un menu principal retro
+- un choix d'apparence du heros
+- une selection de monstres
+- un ecran de combat interactif branche sur les vraies donnees du jeu
+- des types elementaires de monstres et d'attaques
+- des assets optionnels et des effets audio optionnels
+
+Fichiers concernes :
+
+- `include/FrontendApp.h`
+- `src/FrontendApp.cpp`
+- `src/frontend_main.cpp`
+- `include/FrontendViewModels.h`
+- `docs/FRONTEND.md`
+
+### Build recommande avec CMake
+
+Si SFML est installe sur la machine :
+
+```bash
+cmake -S . -B build
+cmake --build build --config Release
+```
+
+Le projet cree :
+
+- `alterdune_console`
+- `alterdune_frontend` si SFML est detecte
+
+### Lancer le frontend
+
+Sous Windows avec CMake :
+
+```powershell
+cmake -S . -B build
+cmake --build build --config Release
+.\build\Release\alterdune_frontend.exe
+```
+
+Si le generateur n'utilise pas le dossier `Release`, le binaire peut aussi se trouver ici :
+
+```powershell
+.\build\alterdune_frontend.exe
+```
+
+### Controles du frontend
+
+- menu : clic souris ou fleches `Haut/Bas` + `Entree`
+- bestiary : clic souris ou fleches `Haut/Bas`
+- items : clic souris ou fleches `Haut/Bas`
+- selection de monstre : clic souris ou fleches `Haut/Bas` + `Entree`
+- combat : clic souris ou fleches `Gauche/Droite` + `Entree`
+- sous-menus ACT / ITEM : clic souris ou fleches `Haut/Bas` + `Entree`
+- retour / fermeture d'un panneau : `Esc`
+
+### Notes SFML
+
+Le frontend utilise SFML 3 avec les modules :
+
+- `graphics`
+- `window`
+- `system`
+- `audio`
+
+Le code essaie de charger une police locale dans `assets/fonts/`, puis bascule sur des polices Windows classiques si besoin.
+
+Le frontend peut aussi charger des assets optionnels depuis `assets/` :
+
+- fonds de regions
+- portraits du heros et des monstres
+- sprites
+- panneaux UI
+- effets sonores courts
+
+S'ils ne sont pas encore presents, des placeholders retro sont utilises automatiquement.
+
 ## Packages necessaires
 
 Il n'y a aucun package externe a installer pour faire tourner ce projet.
@@ -159,6 +244,19 @@ Exemples de compilateurs possibles :
 
 - Visual Studio / MSVC
 - g++
+
+## Preparation du frontend bonus
+
+Le projet commence maintenant a preparer un futur frontend style vieux Pokemon.
+
+Fichiers ajoutes pour cela :
+
+- `docs/FRONTEND.md` : direction artistique et plan d'integration
+- `docs/UI_MOCKUP.txt` : maquette textuelle d'un ecran de combat
+- `include/FrontendViewModels.h` : structures de donnees prevues pour une future UI
+- `assets/README.md` : organisation recommandee des assets
+
+Le moteur du jeu reste console pour l'instant, mais la structure est pensee pour brancher plus tard une interface graphique, idealement avec SFML.
 
 ## Choix defendables a l'oral
 

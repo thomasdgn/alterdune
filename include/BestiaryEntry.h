@@ -13,6 +13,7 @@ public:
                   int maxHp = 0,
                   int atk = 0,
                   int def = 0,
+                  const std::string& description = "",
                   const std::string& result = "");
 
     const std::string& getName() const;
@@ -20,7 +21,9 @@ public:
     int getMaxHp() const;
     int getAtk() const;
     int getDef() const;
+    const std::string& getDescription() const;
     const std::string& getResult() const;
+    void setResult(const std::string& result);
 
 private:
     std::string m_name;
@@ -28,6 +31,7 @@ private:
     int m_maxHp;
     int m_atk;
     int m_def;
+    std::string m_description;
     std::string m_result;
 };
 

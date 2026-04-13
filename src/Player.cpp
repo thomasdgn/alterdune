@@ -5,7 +5,7 @@
 using namespace std;
 
 Player::Player(const string& name, int maxHp, int atk, int def)
-    : Entity(name, maxHp, atk, def), m_kills(0), m_spares(0), m_victories(0)
+    : Entity(name, maxHp, atk, def), m_appearanceId("wanderer"), m_kills(0), m_spares(0), m_victories(0)
 {
 }
 
@@ -52,6 +52,7 @@ void Player::displayStats(ostream& os) const
     os << "\nKills: " << m_kills
        << "\nSpares: " << m_spares
        << "\nVictories: " << m_victories
+       << "\nAppearance: " << m_appearanceId
        << "\nInventory slots: " << m_inventory.size() << "\n";
 }
 
@@ -91,15 +92,25 @@ bool Player::useItem(size_t index, ostream& os)
 
     if (item.getType() == ItemType::HEAL)
     {
-        heal(item.getValue());
+        const int healedAmount = heal(item.getValue());
         item.consumeOne();
         os << getName() << " uses " << item.getName() << " and recovers "
-           << item.getValue() << " HP.\n";
+           << healedAmount << " HP.\n";
         return true;
     }
 
     os << "This item type is not implemented yet.\n";
     return false;
+}
+
+const string& Player::getAppearanceId() const
+{
+    return m_appearanceId;
+}
+
+void Player::setAppearanceId(const string& appearanceId)
+{
+    m_appearanceId = appearanceId.empty() ? "wanderer" : appearanceId;
 }
 
 int Player::getKills() const

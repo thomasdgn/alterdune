@@ -2,7 +2,7 @@
 
 ## 1. Objectif du document
 
-Ce document resume le diagramme UML de la version TD11-12 du projet ALTERDUNE.
+Ce document resume le diagramme UML de la version actuelle du projet ALTERDUNE.
 
 Le but est de montrer clairement :
 
@@ -19,7 +19,12 @@ Il s'agit d'un UML textuel volontairement simple, lisible et defendable a l'oral
 ```text
 Entity
 |-- Player
-`-- Monster
+`-- Monster (abstraite)
+
+Monster
+|-- NormalMonster
+|-- MiniBossMonster
+`-- BossMonster
 
 Player
 `-- vector<Item>
@@ -29,7 +34,7 @@ Monster
 
 Game
 |-- Player
-|-- vector<Monster> monsterCatalog
+|-- vector<unique_ptr<Monster>> monsterCatalog
 |-- vector<BestiaryEntry> bestiary
 `-- map<string, ActAction> actCatalog
 ```
@@ -111,23 +116,25 @@ Role :
 
 ### 3.3 `Monster`
 
-Classe derivee de `Entity`.
+Classe abstraite derivee de `Entity`.
 
 ```text
-Monster : Entity
+Monster : Entity <<abstract>>
 --------------------------------------------
-- m_category : MonsterCategory
 - m_mercy : int
 - m_mercyGoal : int
 - m_actIds : vector<string>
 --------------------------------------------
-+ Monster(name = "", category = NORMAL, maxHp = 0, atk = 0, def = 0, mercyGoal = 100, actIds = {})
++ Monster(name = "", maxHp = 0, atk = 0, def = 0, mercyGoal = 100, actIds = {})
 + getEntityType() : string
 + printStatus(os) : void
-+ getCategory() : MonsterCategory
++ getCategory() : MonsterCategory = 0
++ getMaxActChoices() : int = 0
++ clone() : unique_ptr<Monster> = 0
 + getMercy() : int
 + getMercyGoal() : int
 + getActIds() : const vector<string>&
++ getAvailableActIds() : vector<string>
 + addMercy(amount) : void
 + isSpareable() : bool
 + categoryFromString(value) : MonsterCategory
@@ -137,11 +144,59 @@ Monster : Entity
 Role :
 
 - representer un ennemi du jeu
-- stocker sa categorie
 - gerer la progression vers un spare via la mercy
 - memoriser quelles actions ACT sont autorisees
+- servir de base polymorphe aux differentes categories de monstres
 
-### 3.4 `Item`
+### 3.4 `NormalMonster`
+
+```text
+NormalMonster : Monster
+--------------------------------------------
++ NormalMonster(name = "", maxHp = 0, atk = 0, def = 0, mercyGoal = 100, actIds = {})
++ getCategory() : MonsterCategory
++ getMaxActChoices() : int
++ clone() : unique_ptr<Monster>
+```
+
+Role :
+
+- representer un monstre normal
+- limiter le nombre d'actions ACT disponibles a 2
+
+### 3.5 `MiniBossMonster`
+
+```text
+MiniBossMonster : Monster
+--------------------------------------------
++ MiniBossMonster(name = "", maxHp = 0, atk = 0, def = 0, mercyGoal = 100, actIds = {})
++ getCategory() : MonsterCategory
++ getMaxActChoices() : int
++ clone() : unique_ptr<Monster>
+```
+
+Role :
+
+- representer un mini-boss
+- limiter le nombre d'actions ACT disponibles a 3
+
+### 3.6 `BossMonster`
+
+```text
+BossMonster : Monster
+--------------------------------------------
++ BossMonster(name = "", maxHp = 0, atk = 0, def = 0, mercyGoal = 100, actIds = {})
++ getCategory() : MonsterCategory
++ getMaxActChoices() : int
++ clone() : unique_ptr<Monster>
+```
+
+Role :
+
+- representer un boss
+- limiter le nombre d'actions ACT disponibles a 4
+
+### 3.7 `Item`
 
 ```text
 Item
@@ -168,7 +223,7 @@ Role :
 - representer un objet de l'inventaire
 - gerer son type, sa valeur et sa quantite
 
-### 3.5 `ActAction`
+### 3.8 `ActAction`
 
 ```text
 ActAction
@@ -188,7 +243,7 @@ Role :
 - representer une action du catalogue ACT
 - associer un identifiant, un texte et un effet sur la mercy
 
-### 3.6 `BestiaryEntry`
+### 3.9 `BestiaryEntry`
 
 ```text
 BestiaryEntry
@@ -211,10 +266,10 @@ BestiaryEntry
 
 Role :
 
-- memoriser les monstres deja rencontres
+- memoriser les monstres vaincus
 - stocker un resultat simple : `Killed` ou `Spared`
 
-### 3.7 `Game`
+### 3.10 `Game`
 
 Classe centrale qui pilote le programme.
 
@@ -222,7 +277,7 @@ Classe centrale qui pilote le programme.
 Game
 ---------------------------------------------------------
 - m_player : Player
-- m_monsterCatalog : vector<Monster>
+- m_monsterCatalog : vector<unique_ptr<Monster>>
 - m_bestiary : vector<BestiaryEntry>
 - m_actCatalog : map<string, ActAction>
 - m_rng : mt19937
@@ -243,7 +298,9 @@ Game
 - showPlayerStats() const : void
 - showItems() : void
 - startBattle() : void
-- createRandomMonster() : Monster
+- hasReachedEnding() const : bool
+- displayEndingAndExit() : void
+- createRandomMonster() : unique_ptr<Monster>
 - randomInt(minValue, maxValue) : int
 - recordBattleResult(monster, result) : void
 - trim(value) : string
@@ -296,6 +353,9 @@ Role :
 ```text
 Entity <|-- Player
 Entity <|-- Monster
+Monster <|-- NormalMonster
+Monster <|-- MiniBossMonster
+Monster <|-- BossMonster
 ```
 
 Interpretation :
@@ -334,9 +394,12 @@ Interpretation :
 
 
 - `Entity` contient tout ce qui est commun aux combattants
-- `Player` et `Monster` heritent de `Entity`
+- `Player` herite de `Entity`
+- `Monster` est une classe abstraite qui herite de `Entity`
+- `NormalMonster`, `MiniBossMonster` et `BossMonster` heritent de `Monster`
 - `Player` ajoute l'inventaire et les statistiques globales
-- `Monster` ajoute la categorie, la mercy et les ACT autorises
+- `Monster` ajoute la mercy et les ACT autorises
+- les classes derivees de `Monster` definissent un comportement different selon la categorie
 - `Game` orchestre tout le programme
 - les donnees du jeu sont chargees depuis des CSV
-- le polymorphisme est montre par les methodes virtuelles de `Entity`
+- le polymorphisme est montre par les methodes virtuelles de `Entity` et surtout par les monstres derives

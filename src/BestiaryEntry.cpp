@@ -7,8 +7,15 @@ BestiaryEntry::BestiaryEntry(const string& name,
                              int maxHp,
                              int atk,
                              int def,
+                             const string& description,
                              const string& result)
-    : m_name(name), m_category(category), m_maxHp(maxHp), m_atk(atk), m_def(def), m_result(result)
+    : m_name(name),
+      m_category(category),
+      m_maxHp(maxHp),
+      m_atk(atk),
+      m_def(def),
+      m_description(description),
+      m_result(result)
 {
 }
 
@@ -37,7 +44,17 @@ int BestiaryEntry::getDef() const
     return m_def;
 }
 
+const string& BestiaryEntry::getDescription() const
+{
+    return m_description;
+}
+
 const string& BestiaryEntry::getResult() const
 {
     return m_result;
+}
+
+void BestiaryEntry::setResult(const string& result)
+{
+    m_result = result;
 }

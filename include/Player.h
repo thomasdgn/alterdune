@@ -23,6 +23,8 @@ public:
     void displayStats(std::ostream& os) const;
     void displayItems(std::ostream& os) const;
     bool useItem(std::size_t index, std::ostream& os);
+    const std::string& getAppearanceId() const;
+    void setAppearanceId(const std::string& appearanceId);
 
     int getKills() const;
     int getSpares() const;
@@ -34,6 +36,7 @@ public:
 
 private:
     std::vector<Item> m_inventory;
+    std::string m_appearanceId;
     int m_kills;
     int m_spares;
     int m_victories;
