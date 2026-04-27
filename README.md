@@ -209,6 +209,7 @@ Si le generateur n'utilise pas le dossier `Release`, le binaire peut aussi se tr
 - combat : clic souris ou fleches `Gauche/Droite` + `Entree`
 - sous-menus ACT / ITEM : clic souris ou fleches `Haut/Bas` + `Entree`
 - retour / fermeture d'un panneau : `Esc`
+- plein ecran / fenetre : `F11`
 
 ### Notes SFML
 
@@ -244,6 +245,12 @@ Exemples de compilateurs possibles :
 
 - Visual Studio / MSVC
 - g++
+
+Pour le frontend bonus, il faut aussi :
+
+- SFML 3
+
+Le projet inclut deja un premier pack de sons retro placeholder dans `assets/sfx/`, donc aucun telechargement audio supplementaire n'est necessaire pour tester cette partie.
 
 ## Preparation du frontend bonus
 

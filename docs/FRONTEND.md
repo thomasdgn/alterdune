@@ -227,6 +227,7 @@ La passe de polish la plus recente ajoute aussi :
 - des cadres et portraits accentues par type elementaire pour garder les informations lisibles sans que le sprite les cache
 - des arenes de boss plus marquees selon le type et le boss rencontre
 - des transitions et FX un peu plus spectaculaires pour rendre le combat moins statique
+- un mode plein ecran avec `F11`
 
 ## Why this is a good next step
 

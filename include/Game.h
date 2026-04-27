@@ -10,6 +10,7 @@
 #include <memory>
 #include <map>
 #include <random>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -20,12 +21,15 @@ public:
 
     bool initialize();
     bool initializeForFrontend(const std::string& playerName = "Traveler");
+    void setLanguage(const std::string& languageCode);
+    const std::string& getLanguage() const;
     void setPlayerAppearance(const std::string& appearanceId);
     const std::string& getPlayerAppearance() const;
     void run();
     FrontendMenuViewData buildFrontendMenuViewData() const;
     FrontendPlayerStatsViewData buildFrontendPlayerStatsViewData() const;
     std::vector<FrontendMonsterCardViewData> buildFrontendMonsterSelectionViewData() const;
+    FrontendWorldMapViewData buildFrontendWorldMapViewData() const;
     FrontendBattleViewData buildFrontendBattlePreviewViewData(std::size_t displayIndex = 0) const;
     std::vector<FrontendBestiaryEntryViewData> buildFrontendBestiaryViewData() const;
     std::vector<FrontendInventoryItemViewData> buildFrontendInventoryViewData() const;
@@ -59,6 +63,7 @@ private:
     std::vector<BestiaryEntry> m_bestiary;
     std::map<std::string, ActAction> m_actCatalog;
     std::mt19937 m_rng;
+    std::string m_languageCode;
     int m_nextFightBonus;
     int m_nextActBonus;
     int m_guardCharges;
@@ -68,6 +73,8 @@ private:
     bool m_hpMilestoneUnlocked;
     bool m_atkMilestoneUnlocked;
     bool m_defMilestoneUnlocked;
+    std::set<std::string> m_regionKeys;
+    std::set<std::string> m_clearedEncounters;
     std::unique_ptr<Monster> m_frontendBattleMonster;
     std::map<std::string, int> m_frontendActUsage;
     std::string m_frontendBattleLog;
@@ -91,7 +98,21 @@ private:
     void startBattle();
     int chooseMonsterIndex() const;
     std::vector<std::size_t> getAvailableMonsterIndices() const;
+    std::vector<std::size_t> getCampaignOrderedMonsterIndices() const;
     bool isMonsterUnlocked(const Monster& monster) const;
+    bool isEncounterCleared(const std::string& monsterName) const;
+    bool isEncounterAvailableNow(const Monster& monster) const;
+    bool isRegionUnlocked(const std::string& regionName) const;
+    bool doesEncounterGrantKey(const Monster& monster) const;
+    bool hasRegionKey(const std::string& regionName) const;
+    int getRegionKeyCount() const;
+    std::vector<std::string> getCampaignRegionOrder() const;
+    std::vector<std::string> getRegionEncounterOrder(const std::string& regionName) const;
+    std::string getRequiredKeyForRegion(const std::string& regionName) const;
+    std::string getKeyNameForRegion(const std::string& regionName) const;
+    std::string getNextObjectiveText() const;
+    std::string getMonsterRewardHint(const Monster& monster) const;
+    std::string getElementIcon(const std::string& elementName) const;
     void displayBattleState(const Monster& monster) const;
     BattleTurnResult handleFightAction(Monster& monster);
     BattleTurnResult handleActAction(Monster& monster, std::map<std::string, int>& actUsage);
@@ -112,6 +133,14 @@ private:
     std::string getMonsterAttackType(const Monster& monster) const;
     std::string getMonsterElementType(const Monster& monster) const;
     std::string getAttackElementType(const std::string& attackStyleId) const;
+    std::string getLocalizedActText(const ActAction& action) const;
+    std::string localizeRegionName(const std::string& regionName) const;
+    std::string localizeElementName(const std::string& elementName) const;
+    std::string localizeAttackTypeName(const std::string& attackType) const;
+    std::string localizeCategoryName(MonsterCategory category) const;
+    std::string localizeThreatName(const std::string& threat) const;
+    bool isFrench() const;
+    std::string tr(const std::string& englishText, const std::string& frenchText) const;
     float getElementalEffectiveness(const std::string& attackElement, const std::string& targetElement) const;
     std::string getAttackStyleLabel(const std::string& attackStyleId) const;
     std::string getAttackStyleDescription(const std::string& attackStyleId) const;

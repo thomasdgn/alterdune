@@ -14,7 +14,9 @@ struct FrontendStatBarViewData
 struct FrontendActionButtonViewData
 {
     std::string id;
+    std::string icon;
     std::string label;
+    std::string subtitle;
     bool enabled;
 };
 
@@ -47,14 +49,22 @@ struct FrontendMonsterCardViewData
     std::string name;
     std::string category;
     std::string elementType;
+    std::string elementIcon;
     std::string land;
     std::string threat;
     std::string physique;
     std::string description;
+    std::string routeLabel;
+    std::string rewardHint;
     int hp;
     int atk;
     int def;
     bool unlocked;
+    bool cleared;
+    bool availableNow;
+    bool keyBattle;
+    int regionIndex;
+    int nodeIndex;
 };
 
 struct FrontendBattleViewData
@@ -71,6 +81,7 @@ struct FrontendBattleViewData
     std::string monsterName;
     std::string monsterCategory;
     std::string monsterElementType;
+    std::string monsterElementIcon;
     std::string monsterPhysique;
     std::string monsterDescription;
     FrontendStatBarViewData playerHpBar;
@@ -85,6 +96,7 @@ struct FrontendBestiaryEntryViewData
     std::string name;
     std::string category;
     std::string elementType;
+    std::string elementIcon;
     std::string land;
     std::string physique;
     std::string result;
@@ -101,6 +113,14 @@ struct FrontendInventoryItemViewData
     std::string tacticalEffect;
     int value;
     int quantity;
+};
+
+struct FrontendWorldMapViewData
+{
+    std::string title;
+    std::string subtitle;
+    std::string objectiveText;
+    std::vector<FrontendMonsterCardViewData> nodes;
 };
 
 #endif

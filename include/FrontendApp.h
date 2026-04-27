@@ -27,6 +27,11 @@ private:
         float verticalBias = 0.f;
         float padding = 0.f;
         sf::Color glowColor = sf::Color::Transparent;
+        float bobAmplitude = 0.f;
+        float bobSpeed = 1.f;
+        float swayAmplitude = 0.f;
+        float rotationAmplitude = 0.f;
+        float scalePulse = 0.f;
     };
 
     struct AnimationClip
@@ -87,10 +92,14 @@ private:
     Game m_game;
     sf::RenderWindow m_window;
     sf::Font m_font;
+    sf::View m_uiView;
     std::map<std::string, sf::Texture> m_textures;
     std::map<std::string, AnimationClip> m_animationClips;
     std::map<std::string, sf::SoundBuffer> m_soundBuffers;
     std::map<std::string, std::unique_ptr<sf::Sound>> m_sounds;
+    std::map<std::string, std::string> m_musicTracks;
+    std::unique_ptr<sf::Music> m_musicPlayer;
+    std::string m_currentMusicKey;
     sf::Clock m_animationClock;
     sf::Clock m_screenTransitionClock;
     sf::Clock m_battleFlashClock;
@@ -129,6 +138,7 @@ private:
     FrontendBattleViewData m_cachedBattleView;
     std::string m_pendingPlayerAttackId;
     std::string m_pendingMonsterFxClip;
+    std::string m_pendingMonsterSoundKey;
     sf::Color m_pendingMonsterFlashColor;
 
     bool loadFont();
@@ -139,8 +149,15 @@ private:
                                 float frameDuration,
                                 bool loop = true);
     void loadOptionalSounds();
+    void loadOptionalMusic();
     void playSoundIfAvailable(const std::string& soundKey, float volume = 65.f);
+    void playMusicTrackIfAvailable(const std::string& musicKey, float volume = 0.f);
+    float getRecommendedMusicVolume(const std::string& musicKey) const;
+    void updateMusicForCurrentContext();
+    std::string getMusicKeyForCurrentContext() const;
     void recreateWindow();
+    void updateUIView();
+    sf::Vector2f mapMouseToUi(const sf::Vector2i& pixelPosition) const;
     void processEvents();
     void render();
 
@@ -214,6 +231,9 @@ private:
                          const sf::Color& color,
                          float maxWidth,
                          float lineSpacing = 1.2f);
+    void drawElementBadge(const std::string& elementType,
+                          const sf::Vector2f& center,
+                          float radius);
     void drawStatBar(const FrontendStatBarViewData& bar,
                      const sf::Vector2f& position,
                      const sf::Vector2f& size,
@@ -250,7 +270,12 @@ private:
     void updateBattlePresentation();
     void updateBattleAnimationBindings(const std::string& playerAppearance, const std::string& monsterName);
     std::string getFxClipForAttackId(const std::string& attackId) const;
+    std::string getSoundKeyForAttackId(const std::string& attackId) const;
+    std::string getOutcomeSoundKey(const std::string& statusText) const;
+    std::string getMonsterResponseSoundKey(const FrontendBattleViewData& beforeView,
+                                           const FrontendBattleViewData& afterView) const;
     std::string tr(const std::string& englishText, const std::string& frenchText) const;
+    std::string localizeDynamicText(const std::string& text) const;
     std::string trAppearanceLabel(const std::string& appearanceId) const;
     std::string localizeMenuLabel(const FrontendActionButtonViewData& button) const;
     std::string localizeBattleActionLabel(const FrontendActionButtonViewData& button) const;
@@ -258,9 +283,11 @@ private:
 
     static sf::FloatRect makeRect(float x, float y, float width, float height);
     static bool contains(const sf::FloatRect& rect, const sf::Vector2f& point);
+    static std::string getCanonicalRegionKey(const std::string& regionName);
     static sf::Color getRegionColor(const std::string& regionName);
     static sf::Color getElementColor(const std::string& elementType);
     static std::string toAssetSlug(const std::string& text);
 };
 
 #endif
+

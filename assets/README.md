@@ -12,7 +12,8 @@ assets/
 |-- portraits/
 |-- sprites/
 |-- ui/
-`-- sfx/
+|-- sfx/
+`-- music/
 ```
 
 ## Backgrounds reconnus
@@ -97,8 +98,95 @@ Le frontend essaie aussi de charger ces effets sonores optionnels :
 - `assets/sfx/battle_act.wav`
 - `assets/sfx/battle_item.wav`
 - `assets/sfx/battle_mercy.wav`
+- `assets/sfx/battle_cast.wav`
+- `assets/sfx/battle_heal.wav`
+- `assets/sfx/battle_victory.wav`
+- `assets/sfx/battle_defeat.wav`
+- `assets/sfx/battle_blade.wav`
+- `assets/sfx/battle_pulse.wav`
+- `assets/sfx/battle_dust.wav`
+- `assets/sfx/battle_ember.wav`
+- `assets/sfx/battle_tide.wav`
+- `assets/sfx/battle_fire.wav`
+- `assets/sfx/battle_water.wav`
+- `assets/sfx/battle_shadow.wav`
+- `assets/sfx/battle_storm.wav`
+- `assets/sfx/battle_metal.wav`
+- `assets/sfx/battle_nature.wav`
+- `assets/sfx/battle_light.wav`
+- `assets/sfx/battle_void.wav`
+- `assets/sfx/battle_arcane.wav`
+- `assets/sfx/battle_buff.wav`
+- `assets/sfx/battle_debuff.wav`
+- `assets/sfx/battle_guard.wav`
+- `assets/sfx/battle_spare.wav`
+- `assets/sfx/monster_queenbyte.wav`
+- `assets/sfx/monster_archivore.wav`
+- `assets/sfx/monster_cinderhex.wav`
+- `assets/sfx/monster_tidewarden.wav`
+- `assets/sfx/monster_solaraith.wav`
+- `assets/sfx/monster_nullsaint.wav`
 
-Si ces fichiers n'existent pas, le jeu reste jouable sans son.
+Le projet contient maintenant un premier pack de sons retro placeholder deja genere dans `assets/sfx/`.
+
+Le frontend peut s'en servir pour differencier :
+
+- les styles d'attaque du heros
+- les ripostes elementaires des monstres
+- les signatures sonores des monstres importants
+- les soins, buffs, debuffs et spare
+
+Si certains fichiers n'existent pas, le jeu reste jouable sans son.
+
+## Musiques reconnues
+
+Le frontend peut maintenant charger des musiques optionnelles pour le menu, les regions et certains combats de boss :
+
+- `assets/music/menu_theme.wav`
+- `assets/music/menu_theme.ogg`
+- `assets/music/sunken_mire.wav`
+- `assets/music/sunken_mire.ogg`
+- `assets/music/glass_dunes.wav`
+- `assets/music/glass_dunes.ogg`
+- `assets/music/signal_wastes.wav`
+- `assets/music/signal_wastes.ogg`
+- `assets/music/ancient_vault.wav`
+- `assets/music/ancient_vault.ogg`
+- `assets/music/battle_generic.wav`
+- `assets/music/battle_generic.ogg`
+- `assets/music/boss_fire.wav`
+- `assets/music/boss_fire.ogg`
+- `assets/music/boss_water.wav`
+- `assets/music/boss_water.ogg`
+- `assets/music/boss_shadow.wav`
+- `assets/music/boss_shadow.ogg`
+- `assets/music/boss_light.wav`
+- `assets/music/boss_light.ogg`
+- `assets/music/boss_nature.wav`
+- `assets/music/boss_nature.ogg`
+- `assets/music/boss_metal.wav`
+- `assets/music/boss_metal.ogg`
+- `assets/music/boss_storm.wav`
+- `assets/music/boss_storm.ogg`
+- `assets/music/boss_void.wav`
+- `assets/music/boss_void.ogg`
+- `assets/music/boss_queenbyte.ogg`
+- `assets/music/boss_archivore.ogg`
+- `assets/music/boss_cinderhex.ogg`
+- `assets/music/boss_tidewarden.ogg`
+- `assets/music/boss_solaraith.ogg`
+- `assets/music/boss_nullsaint.ogg`
+
+Le projet contient maintenant un premier pack de pistes placeholder en `wav` pour tester tout de suite :
+
+- menu
+- ambiance de region
+- combat generique
+- themes de boss elementaires
+
+Le frontend privilegie les fichiers `ogg` quand ils existent, puis retombe sur `wav`.
+
+Si vous remplacez ces fichiers par de vraies musiques, gardez simplement les memes noms.
 
 ## Convention de nommage
 
