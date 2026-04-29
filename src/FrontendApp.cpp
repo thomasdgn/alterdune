@@ -23,7 +23,7 @@ sf::FloatRect rectf(float x, float y, float w, float h)
 }
 }
 
-FrontendApp::FrontendApp()
+FrontendApp::FrontendApp(bool endingPreviewMode)
     : m_game(),
       m_window(),
       m_font(),
@@ -48,6 +48,7 @@ FrontendApp::FrontendApp()
       m_languageCode("en"),
       m_statusText("Select Start Battle to enter the graphical flow."),
       m_fullscreen(false),
+      m_endingPreviewMode(endingPreviewMode),
       m_battlePresentationPhase(BattlePresentationPhase::Idle),
       m_displayedPlayerHp(0),
       m_displayedMonsterHp(0),
@@ -61,6 +62,8 @@ FrontendApp::FrontendApp()
       m_hasPendingScreenChange(false),
       m_pendingScreen(Screen::MonsterSelect),
       m_pendingScreenStatus(),
+      m_showEndingBlock(false),
+      m_pendingEndingData(),
       m_hasCachedBattleView(false),
       m_cachedBattleView(),
       m_pendingPlayerAttackId(),
@@ -75,6 +78,13 @@ bool FrontendApp::initialize()
     if (!m_game.initializeForFrontend("Traveler"))
     {
         return false;
+    }
+
+    if (m_endingPreviewMode)
+    {
+        m_game.enableEndingPreviewMode();
+        m_statusText = tr("Ending preview mode: the game ends after 2 victories.",
+                          "Mode apercu des fins : le jeu se termine apres 2 victoires.");
     }
 
     recreateWindow();
@@ -716,6 +726,28 @@ void FrontendApp::processEvents()
                 recreateWindow();
                 continue;
             }
+            if (m_showEndingBlock
+                && (keyPressed->code == sf::Keyboard::Key::Enter
+                    || keyPressed->code == sf::Keyboard::Key::Space
+                    || keyPressed->code == sf::Keyboard::Key::Escape))
+            {
+                m_showEndingBlock = false;
+                playSoundIfAvailable("ui_confirm", 55.f);
+                continue;
+            }
+        }
+
+        if (m_showEndingBlock)
+        {
+            if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>())
+            {
+                if (mousePressed->button == sf::Mouse::Button::Left)
+                {
+                    m_showEndingBlock = false;
+                    playSoundIfAvailable("ui_confirm", 55.f);
+                }
+            }
+            continue;
         }
 
         switch (m_currentScreen)
@@ -770,6 +802,7 @@ void FrontendApp::render()
     }
 
     renderTransitionOverlay();
+    renderGameEndingBlock();
     m_window.display();
 }
 
@@ -822,6 +855,56 @@ void FrontendApp::renderTransitionOverlay()
         streak.setFillColor(sf::Color(255, 220, 153, static_cast<uint8_t>(26.f * std::clamp(t, 0.f, 1.f))));
         m_window.draw(streak);
     }
+}
+
+void FrontendApp::renderGameEndingBlock()
+{
+    if (!m_showEndingBlock || !m_pendingEndingData.reached)
+    {
+        return;
+    }
+
+    sf::Color routeColor(92, 118, 170);
+    if (m_pendingEndingData.routeId == "genocide")
+    {
+        routeColor = sf::Color(168, 54, 58);
+    }
+    else if (m_pendingEndingData.routeId == "pacifist")
+    {
+        routeColor = sf::Color(82, 157, 104);
+    }
+
+    sf::RectangleShape veil({1280.f, 720.f});
+    veil.setFillColor(sf::Color(8, 10, 14, 178));
+    m_window.draw(veil);
+
+    const float pulse = 0.5f + 0.5f * std::sin(m_animationClock.getElapsedTime().asSeconds() * 2.8f);
+    drawPanel(rectf(260.f, 116.f, 760.f, 470.f), sf::Color(26, 29, 36), 6.f);
+    drawPanel(rectf(284.f, 140.f, 712.f, 30.f), routeColor, 0.f);
+
+    sf::CircleShape seal(42.f);
+    seal.setFillColor(sf::Color(routeColor.r, routeColor.g, routeColor.b, static_cast<uint8_t>(190 + pulse * 45.f)));
+    seal.setOutlineThickness(4.f);
+    seal.setOutlineColor(sf::Color(255, 236, 196));
+    seal.setPosition({598.f, 192.f});
+    m_window.draw(seal);
+
+    drawText(tr("JOURNEY COMPLETE", "VOYAGE TERMINE"), {640.f, 198.f}, 20, sf::Color(210, 228, 240), true);
+    drawText(tr("ENDING TYPE", "TYPE DE FIN"), {640.f, 228.f}, 16, sf::Color(210, 228, 240), true);
+    drawText(m_pendingEndingData.title, {640.f, 258.f}, 42, sf::Color(255, 242, 210), true);
+    drawWrappedText(m_pendingEndingData.subtitle, {350.f, 326.f}, 21, sf::Color(255, 232, 185), 580.f, 1.25f);
+
+    drawPanel(rectf(326.f, 398.f, 628.f, 78.f), sf::Color(38, 44, 52), 3.f);
+    drawWrappedText(m_pendingEndingData.statsText, {356.f, 418.f}, 17, sf::Color(210, 228, 240), 568.f, 1.25f);
+
+    drawPanel(rectf(430.f, 522.f, 420.f, 36.f),
+              sf::Color(58, 72, 84, static_cast<uint8_t>(182 + pulse * 42.f)),
+              3.f);
+    drawText(tr("Press Enter, Escape or click to continue", "Entree, Echap ou clic pour continuer"),
+             {640.f, 529.f},
+             16,
+             sf::Color(255, 236, 196),
+             true);
 }
 
 void FrontendApp::drawBackgroundGradient(const sf::Color& topColor, const sf::Color& bottomColor)
@@ -2941,11 +3024,18 @@ void FrontendApp::handleBattleEvent(const sf::Event& event)
         {
             if (keyPressed->code == sf::Keyboard::Key::Enter || keyPressed->code == sf::Keyboard::Key::Space || keyPressed->code == sf::Keyboard::Key::Escape)
             {
+                const FrontendEndingViewData endingData = m_game.buildFrontendEndingViewData();
                 if (m_game.hasActiveFrontendBattle())
                 {
                     m_game.leaveFrontendBattle();
                 }
                 changeScreen(m_pendingScreen, m_pendingScreenStatus);
+                if (endingData.reached)
+                {
+                    m_pendingEndingData = endingData;
+                    m_showEndingBlock = true;
+                    playSoundIfAvailable("battle_victory", 64.f);
+                }
             }
             return;
         }
@@ -3323,11 +3413,18 @@ void FrontendApp::handleBattleClick(const sf::Vector2f& point)
     {
         if (contains(rectf(330.f, 208.f, 620.f, 220.f), point))
         {
+            const FrontendEndingViewData endingData = m_game.buildFrontendEndingViewData();
             if (m_game.hasActiveFrontendBattle())
             {
                 m_game.leaveFrontendBattle();
             }
             changeScreen(m_pendingScreen, m_pendingScreenStatus);
+            if (endingData.reached)
+            {
+                m_pendingEndingData = endingData;
+                m_showEndingBlock = true;
+                playSoundIfAvailable("battle_victory", 64.f);
+            }
         }
         return;
     }

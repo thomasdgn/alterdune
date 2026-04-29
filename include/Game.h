@@ -21,11 +21,13 @@ public:
 
     bool initialize();
     bool initializeForFrontend(const std::string& playerName = "Traveler");
+    void enableEndingPreviewMode();
     void setLanguage(const std::string& languageCode);
     const std::string& getLanguage() const;
     void setPlayerAppearance(const std::string& appearanceId);
     const std::string& getPlayerAppearance() const;
     void run();
+    bool runEndingTest(const std::string& routeId);
     FrontendMenuViewData buildFrontendMenuViewData() const;
     FrontendPlayerStatsViewData buildFrontendPlayerStatsViewData() const;
     std::vector<FrontendMonsterCardViewData> buildFrontendMonsterSelectionViewData() const;
@@ -35,6 +37,7 @@ public:
     std::vector<FrontendInventoryItemViewData> buildFrontendInventoryViewData() const;
     bool startFrontendBattle(std::size_t displayIndex);
     FrontendBattleViewData buildActiveFrontendBattleViewData() const;
+    FrontendEndingViewData buildFrontendEndingViewData() const;
     std::string performFrontendBattleAction(const std::string& actionId);
     std::vector<FrontendActionButtonViewData> buildFrontendFightOptionViewData() const;
     std::vector<FrontendActionButtonViewData> buildFrontendActOptionViewData() const;
@@ -73,6 +76,8 @@ private:
     bool m_hpMilestoneUnlocked;
     bool m_atkMilestoneUnlocked;
     bool m_defMilestoneUnlocked;
+    bool m_endingDisplayed;
+    bool m_endingPreviewMode;
     std::set<std::string> m_regionKeys;
     std::set<std::string> m_clearedEncounters;
     std::unique_ptr<Monster> m_frontendBattleMonster;
@@ -169,6 +174,7 @@ private:
     FrontendBattleViewData buildFrontendBattleViewData(const Monster& monster, const std::string& battleLogText) const;
     bool hasReachedEnding() const;
     void displayEndingAndExit();
+    int getEndingTargetCount() const;
 
     std::unique_ptr<Monster> createRandomMonster();
     int randomInt(int minValue, int maxValue);

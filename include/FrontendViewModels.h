@@ -115,6 +115,15 @@ struct FrontendInventoryItemViewData
     int quantity;
 };
 
+struct FrontendEndingViewData
+{
+    bool reached;
+    std::string routeId;
+    std::string title;
+    std::string subtitle;
+    std::string statsText;
+};
+
 struct FrontendWorldMapViewData
 {
     std::string title;

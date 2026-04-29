@@ -1,35 +1,49 @@
-# ALTERDUNE - TD11-12
+# ALTERDUNE
 
-## Presentation
+ALTERDUNE est un mini RPG en C++ realise pour un projet de Programmation Orientee Objet.
 
-ALTERDUNE est un mini-jeu console RPG en C++ realise pour un projet de Programmation Orientee Objet.
+Le jeu existe en deux versions :
 
-Cette version correspond uniquement au mini-suivi TD11-12 :
+- une version console, stable et jouable ;
+- un frontend SFML bonus, plus visuel, branche sur la meme logique de jeu.
 
-- architecture propre
-- code compilable
-- classes bien separees
-- chargement CSV fonctionnel
-- menu principal fonctionnel
-- debut de combat simple
+Le coeur du projet reste le moteur C++ : progression, combats, inventaire, bestiaire, mercy, monstres, regions et fins multiples.
 
-Le projet n'essaie pas encore de livrer la version finale complete.
+## Fonctionnalites
 
-## Organisation du dossier
+- joueur avec nom, apparence, statistiques et inventaire ;
+- chargement des objets depuis `data/items.csv` ;
+- chargement des monstres depuis `data/monsters.csv` ;
+- campagne organisee par regions ;
+- systeme de cles regionales pour debloquer la suite ;
+- combats avec `FIGHT`, `ACT`, `ITEM`, `MERCY` et fuite ;
+- actions ACT qui augmentent ou diminuent la mercy ;
+- bestiaire rempli au fil des rencontres ;
+- recompenses, objets et ameliorations de progression ;
+- trois fins selon les choix de combat :
+  - `FIN GENOCIDAIRE` : tous les monstres sont tues ;
+  - `FIN PACIFISTE` : tous les monstres sont epargnes avec mercy ;
+  - `FIN NEUTRE` : le parcours melange au moins un kill et une mercy.
+
+En console comme dans le frontend, le type de fin est affiche dans un bloc dedie.
+
+## Organisation
 
 ```text
 alterdune/
+|-- assets/                 assets optionnels du frontend
 |-- data/
 |   |-- items.csv
 |   `-- monsters.csv
-|-- assets/
-|   `-- README.md
 |-- docs/
-|   `-- DESIGN.md
+|   |-- DESIGN.md
+|   |-- FRONTEND.md
+|   `-- UI_MOCKUP.txt
 |-- include/
 |   |-- ActAction.h
 |   |-- BestiaryEntry.h
 |   |-- Entity.h
+|   |-- FrontendApp.h
 |   |-- FrontendViewModels.h
 |   |-- Game.h
 |   |-- Item.h
@@ -39,244 +53,162 @@ alterdune/
 |   |-- ActAction.cpp
 |   |-- BestiaryEntry.cpp
 |   |-- Entity.cpp
+|   |-- FrontendApp.cpp
+|   |-- frontend_main.cpp
 |   |-- Game.cpp
 |   |-- Item.cpp
+|   |-- main.cpp
 |   |-- Monster.cpp
-|   |-- Player.cpp
-|   `-- main.cpp
-|-- .gitignore
-|-- README.md
+|   `-- Player.cpp
+|-- CMakeLists.txt
+`-- README.md
 ```
-
-### Role de chaque dossier
-
-- `src/` : tous les fichiers source `.cpp`
-- `include/` : tous les headers `.h`
-- `data/` : les fichiers CSV du projet
-- `docs/` : les documents de conception
-
-Cette organisation est simple, classique et propre pour un projet C++ etudiant.
-
-## Ce qui est implemente
-
-- saisie du nom du joueur
-- chargement de `data/items.csv`
-- chargement de `data/monsters.csv`
-- creation du joueur
-- affichage d'un resume au demarrage
-- menu principal
-- affichage des stats du joueur
-- affichage et utilisation simple des items
-- affichage du bestiaire
-- base de combat minimaliste
-- catalogue ACT code en dur
 
 ## Architecture POO
 
-### Classes principales
+Classes principales :
 
-- `Entity` : classe de base commune a `Player` et `Monster`
-- `Player` : represente le joueur et son inventaire
-- `Monster` : represente un monstre, sa categorie et sa mercy
-- `Item` : represente un objet de soin
-- `ActAction` : represente une action ACT
-- `BestiaryEntry` : represente une entree du bestiaire
-- `Game` : pilote l'application
+- `Entity` : base commune du joueur et des monstres ;
+- `Player` : joueur, inventaire, statistiques de run ;
+- `Monster` : classe abstraite des ennemis, avec mercy et actions ACT ;
+- `NormalMonster`, `MiniBossMonster`, `BossMonster` : categories concretes de monstres ;
+- `Item` : objets utilisables, principalement les soins ;
+- `ActAction` : action ACT et impact sur la mercy ;
+- `BestiaryEntry` : entree de bestiaire ;
+- `Game` : moteur central, progression, combats, chargement CSV et fins ;
+- `FrontendApp` : interface SFML bonus.
 
-### Notions de POO utilisees
+Notions utilisees :
 
-- encapsulation : chaque classe gere son propre etat
-- heritage : `Player` et `Monster` derivent de `Entity`
-- polymorphisme : `printStatus()` et `getEntityType()` sont virtuelles
-- composition : `Player` contient des `Item`, `Game` contient les objets centraux
+- encapsulation ;
+- heritage ;
+- polymorphisme ;
+- composition ;
+- utilisation de collections STL (`vector`, `map`, `set`, `unique_ptr`) ;
+- chargement de donnees externes en CSV.
 
-## UML textuel rapide
+Le diagramme UML complet est dans `docs/DESIGN.md`.
 
-```text
-Entity
-|-- Player
-`-- Monster
+## Lancer la version deja compilee
 
-Game
-|-- Player
-|-- vector<Monster>
-|-- vector<BestiaryEntry>
-`-- map<string, ActAction>
+Si le dossier `build/Release/` est present, les executables principaux sont :
 
-Player
-`-- vector<Item>
+```powershell
+.\build\Release\alterdune_console.exe
+.\build\Release\alterdune_frontend.exe
 ```
 
-Le detail se trouve dans `docs/DESIGN.md`.
+Le frontend peut aussi etre lance en mode test court :
 
-## Comment lancer le projet
-
-## Option 1 - Visual Studio
-
-1. Ouvrir Visual Studio
-2. Creer un projet `Console App` en C++
-3. Ajouter tous les fichiers de `src/`
-4. Ajouter tous les fichiers de `include/`
-5. Verifier que le dossier de travail contient bien le dossier `data/`
-6. Compiler puis executer
-
-### Point important pour Visual Studio
-
-Le programme lit les fichiers :
-
-- `data/items.csv`
-- `data/monsters.csv`
-
-Donc Visual Studio doit lancer l'executable depuis la racine du projet, ou bien il faut copier le dossier `data/` dans le dossier d'execution.
-
-## Option 2 - g++
-
-Depuis la racine du projet :
-
-```bash
-g++ -std=c++17 -Iinclude src/main.cpp src/Entity.cpp src/Player.cpp src/Monster.cpp src/Item.cpp src/ActAction.cpp src/BestiaryEntry.cpp src/Game.cpp -o alterdune
+```powershell
+.\build\Release\alterdune_frontend.exe --ending-preview
 ```
 
-Puis lancer :
+Dans ce mode, le jeu affiche une fin apres 2 combats gagnes. Cela permet de verifier rapidement le rendu des fins sans refaire toute la campagne.
 
-```bash
-./alterdune
+## Compiler avec CMake
+
+Commande recommandee depuis la racine du projet :
+
+```powershell
+cmake -S . -B build
+cmake --build build --config Release
 ```
 
-Sous Windows PowerShell, si besoin :
+CMake produit :
+
+- `build/Release/alterdune_console.exe` ;
+- `build/Release/alterdune_frontend.exe` si SFML 3 est detecte.
+
+Le frontend utilise SFML 3 avec les modules :
+
+- `graphics` ;
+- `window` ;
+- `system` ;
+- `audio`.
+
+## Compiler seulement la console avec g++
+
+Cette commande compile uniquement la version console. Elle ne compile pas le frontend SFML.
+
+```powershell
+g++ -std=c++17 -Iinclude src/main.cpp src/Entity.cpp src/Player.cpp src/Monster.cpp src/Item.cpp src/ActAction.cpp src/BestiaryEntry.cpp src/Game.cpp -o alterdune.exe
+```
+
+Puis :
 
 ```powershell
 .\alterdune.exe
 ```
 
-## Option 3 - Frontend SFML bonus
+## Tester les fins sans refaire toute la campagne
 
-Le projet contient maintenant un premier frontend bonus avec :
+### Test direct
 
-- une fenetre SFML
-- un choix de langue au demarrage du frontend (`English` / `Francais`)
-- un menu principal retro
-- un choix d'apparence du heros
-- une selection de monstres
-- un ecran de combat interactif branche sur les vraies donnees du jeu
-- des types elementaires de monstres et d'attaques
-- des assets optionnels et des effets audio optionnels
-
-Fichiers concernes :
-
-- `include/FrontendApp.h`
-- `src/FrontendApp.cpp`
-- `src/frontend_main.cpp`
-- `include/FrontendViewModels.h`
-- `docs/FRONTEND.md`
-
-### Build recommande avec CMake
-
-Si SFML est installe sur la machine :
-
-```bash
-cmake -S . -B build
-cmake --build build --config Release
-```
-
-Le projet cree :
-
-- `alterdune_console`
-- `alterdune_frontend` si SFML est detecte
-
-### Lancer le frontend
-
-Sous Windows avec CMake :
+Ces commandes simulent directement une route complete et affichent le bloc final :
 
 ```powershell
-cmake -S . -B build
-cmake --build build --config Release
-.\build\Release\alterdune_frontend.exe
+.\build\Release\alterdune_console.exe --test-ending genocide fr
+.\build\Release\alterdune_console.exe --test-ending pacifist fr
+.\build\Release\alterdune_console.exe --test-ending neutral fr
 ```
 
-Si le generateur n'utilise pas le dossier `Release`, le binaire peut aussi se trouver ici :
+Le dernier argument peut etre `fr` ou `en`.
+
+### Test en 2 combats simules
+
+Ces commandes affichent le rendu d'une fin apres seulement 2 combats simules :
 
 ```powershell
-.\build\alterdune_frontend.exe
+.\build\Release\alterdune_console.exe --test-ending-2 genocide fr
+.\build\Release\alterdune_console.exe --test-ending-2 pacifist fr
+.\build\Release\alterdune_console.exe --test-ending-2 neutral fr
 ```
 
-### Controles du frontend
+Resultats attendus :
 
-- menu : clic souris ou fleches `Haut/Bas` + `Entree`
-- bestiary : clic souris ou fleches `Haut/Bas`
-- items : clic souris ou fleches `Haut/Bas`
-- selection de monstre : clic souris ou fleches `Haut/Bas` + `Entree`
-- combat : clic souris ou fleches `Gauche/Droite` + `Entree`
-- sous-menus ACT / ITEM : clic souris ou fleches `Haut/Bas` + `Entree`
-- retour / fermeture d'un panneau : `Esc`
-- plein ecran / fenetre : `F11`
+- `genocide` : 2 kills, bloc `FIN GENOCIDAIRE` ;
+- `pacifist` : 2 mercy, bloc `FIN PACIFISTE` ;
+- `neutral` : 1 kill et 1 mercy, bloc `FIN NEUTRE`.
 
-### Notes SFML
+### Preview jouable
 
-Le frontend utilise SFML 3 avec les modules :
+Pour tester le vrai deroulement, mais avec une campagne raccourcie a 2 victoires :
 
-- `graphics`
-- `window`
-- `system`
-- `audio`
+```powershell
+.\build\Release\alterdune_console.exe --ending-preview
+.\build\Release\alterdune_frontend.exe --ending-preview
+```
 
-Le code essaie de charger une police locale dans `assets/fonts/`, puis bascule sur des polices Windows classiques si besoin.
+Dans ce mode :
 
-Le frontend peut aussi charger des assets optionnels depuis `assets/` :
+- 2 monstres tues donnent `FIN GENOCIDAIRE` ;
+- 2 monstres epargnes donnent `FIN PACIFISTE` ;
+- 1 monstre tue et 1 monstre epargne donnent `FIN NEUTRE`.
 
-- fonds de regions
-- portraits du heros et des monstres
-- sprites
-- panneaux UI
-- effets sonores courts
+## Controles du frontend
 
-S'ils ne sont pas encore presents, des placeholders retro sont utilises automatiquement.
+- menus : clic souris ou fleches + `Entree` ;
+- selection de monstre : clic souris ou fleches + `Entree` ;
+- combat : clic souris ou fleches gauche/droite + `Entree` ;
+- sous-menus ACT / ITEM : clic souris ou fleches haut/bas + `Entree` ;
+- retour ou fermeture d'un panneau : `Esc` ;
+- plein ecran / fenetre : `F11`.
 
-## Packages necessaires
+## Notes pour la soutenance
 
-Il n'y a aucun package externe a installer pour faire tourner ce projet.
+Points defendables :
 
-Le projet utilise uniquement :
+- le modele console est separe en classes claires ;
+- le frontend reutilise le moteur existant au lieu de dupliquer la logique ;
+- les donnees principales sont externalisees dans les CSV ;
+- les fins dependent directement des choix du joueur ;
+- des modes de test permettent de verifier les fins rapidement ;
+- le projet illustre bien heritage, polymorphisme, composition et encapsulation.
 
-- le compilateur C++
-- la bibliotheque standard C++
+## Documents utiles
 
-Exemples de compilateurs possibles :
-
-- Visual Studio / MSVC
-- g++
-
-Pour le frontend bonus, il faut aussi :
-
-- SFML 3
-
-Le projet inclut deja un premier pack de sons retro placeholder dans `assets/sfx/`, donc aucun telechargement audio supplementaire n'est necessaire pour tester cette partie.
-
-## Preparation du frontend bonus
-
-Le projet commence maintenant a preparer un futur frontend style vieux Pokemon.
-
-Fichiers ajoutes pour cela :
-
-- `docs/FRONTEND.md` : direction artistique et plan d'integration
-- `docs/UI_MOCKUP.txt` : maquette textuelle d'un ecran de combat
-- `include/FrontendViewModels.h` : structures de donnees prevues pour une future UI
-- `assets/README.md` : organisation recommandee des assets
-
-Le moteur du jeu reste console pour l'instant, mais la structure est pensee pour brancher plus tard une interface graphique, idealement avec SFML.
-
-## Choix defendables a l'oral
-
-- le projet est volontairement limite au perimetre TD11-12
-- l'architecture est deja claire
-- le code est deja separé en classes avec `.h` / `.cpp`
-- les donnees sont deja externalisees en CSV
-- le polymorphisme est present sans rendre le code trop complexe
-- la structure du dossier est propre et lisible
-
-## Ce qu'il reste pour la suite
-
-- enrichir le combat
-- ajouter la progression complete
-- gerer les fins multiples
-- enrichir le bestiaire et les interactions ACT
+- `docs/DESIGN.md` : UML et description du modele console ;
+- `docs/FRONTEND.md` : notes de frontend SFML ;
+- `docs/ASSET_INTEGRATION.md` : integration des assets ;
+- `assets/README.md` : organisation des ressources visuelles et audio.

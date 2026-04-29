@@ -33,6 +33,8 @@ Game::Game()
       m_hpMilestoneUnlocked(false),
       m_atkMilestoneUnlocked(false),
       m_defMilestoneUnlocked(false),
+      m_endingDisplayed(false),
+      m_endingPreviewMode(false),
       m_regionKeys(),
       m_clearedEncounters(),
       m_frontendBattleMonster(),
@@ -91,6 +93,8 @@ bool Game::initializeForFrontend(const string& playerName)
     m_hpMilestoneUnlocked = false;
     m_atkMilestoneUnlocked = false;
     m_defMilestoneUnlocked = false;
+    m_endingDisplayed = false;
+    m_endingPreviewMode = false;
     m_regionKeys.clear();
     m_clearedEncounters.clear();
     m_frontendBattleMonster.reset();
@@ -114,6 +118,12 @@ bool Game::initializeForFrontend(const string& playerName)
     }
 
     return true;
+}
+
+void Game::enableEndingPreviewMode()
+{
+    m_endingPreviewMode = true;
+    m_endingDisplayed = false;
 }
 
 void Game::setPlayerAppearance(const string& appearanceId)
@@ -157,7 +167,10 @@ void Game::run()
     {
         if (hasReachedEnding())
         {
-            displayEndingAndExit();
+            if (!m_endingDisplayed)
+            {
+                displayEndingAndExit();
+            }
             break;
         }
 
@@ -173,6 +186,54 @@ void Game::run()
             handleMenuChoice(choice);
         }
     }
+}
+
+bool Game::runEndingTest(const string& routeId)
+{
+    if (routeId != "genocide" && routeId != "pacifist" && routeId != "neutral")
+    {
+        cout << "Unknown ending test route. Use: genocide, pacifist or neutral.\n";
+        return false;
+    }
+
+    m_player = Player("EndingTest");
+    m_bestiary.clear();
+    m_regionKeys.clear();
+    m_clearedEncounters.clear();
+    m_endingDisplayed = false;
+
+    const vector<size_t> orderedIndices = getCampaignOrderedMonsterIndices();
+    const size_t testEncounterCount = static_cast<size_t>(min(getEndingTargetCount(), static_cast<int>(orderedIndices.size())));
+    for (size_t i = 0; i < testEncounterCount; ++i)
+    {
+        const Monster& monster = *m_monsterCatalog[orderedIndices[i]];
+        const bool killThisMonster = routeId == "genocide" || (routeId == "neutral" && i == 0);
+        const string result = killThisMonster ? "Killed" : "Spared";
+
+        if (killThisMonster)
+        {
+            m_player.recordKill();
+        }
+        else
+        {
+            m_player.recordSpare();
+        }
+        m_player.recordVictory();
+        m_clearedEncounters.insert(monster.getName());
+        recordBattleResult(monster, result);
+
+        if (doesEncounterGrantKey(monster))
+        {
+            const string keyName = getKeyNameForRegion(getMonsterRegionName(monster));
+            if (!keyName.empty())
+            {
+                m_regionKeys.insert(keyName);
+            }
+        }
+    }
+
+    displayEndingAndExit();
+    return true;
 }
 
 FrontendMenuViewData Game::buildFrontendMenuViewData() const
@@ -407,6 +468,51 @@ vector<FrontendInventoryItemViewData> Game::buildFrontendInventoryViewData() con
     }
 
     return items;
+}
+
+FrontendEndingViewData Game::buildFrontendEndingViewData() const
+{
+    FrontendEndingViewData data;
+    data.reached = hasReachedEnding();
+    const int clearedEncounters = static_cast<int>(m_clearedEncounters.size());
+    const int campaignEncounters = getEndingTargetCount();
+    data.statsText = tr("Victories: ", "Victoires : ") + to_string(m_player.getVictories())
+        + "  |  " + tr("Kills: ", "Tues : ") + to_string(m_player.getKills())
+        + "  |  " + tr("Spares: ", "Epargnes : ") + to_string(m_player.getSpares())
+        + "  |  " + tr("Monsters cleared: ", "Monstres termines : ")
+        + to_string(clearedEncounters) + "/" + to_string(campaignEncounters);
+
+    if (!data.reached)
+    {
+        data.routeId = "none";
+        data.title = tr("ENDING LOCKED", "FIN VERROUILLEE");
+        data.subtitle = tr("The final boss has not fallen yet.", "Le boss final n'est pas encore tombe.");
+        return data;
+    }
+
+    if (clearedEncounters == campaignEncounters && m_player.getKills() == campaignEncounters)
+    {
+        data.routeId = "genocide";
+        data.title = tr("GENOCIDAL ENDING", "FIN GENOCIDAIRE");
+        data.subtitle = tr("Every monster was killed. Silence settles over the route.",
+                           "Tous les monstres ont ete tues. Le silence tombe sur la route.");
+    }
+    else if (clearedEncounters == campaignEncounters && m_player.getSpares() == campaignEncounters)
+    {
+        data.routeId = "pacifist";
+        data.title = tr("PACIFIST ENDING", "FIN PACIFISTE");
+        data.subtitle = tr("Every monster was spared with mercy. The world remains open.",
+                           "Tous les monstres ont ete epargnes avec mercy. Le monde reste ouvert.");
+    }
+    else
+    {
+        data.routeId = "neutral";
+        data.title = tr("NEUTRAL ENDING", "FIN NEUTRE");
+        data.subtitle = tr("Your journey mixed at least one kill and one mercy.",
+                           "Ton voyage a mele au moins un monstre tue et un monstre epargne.");
+    }
+
+    return data;
 }
 
 bool Game::startFrontendBattle(size_t displayIndex)
@@ -1995,6 +2101,10 @@ void Game::concludeBattle(const Monster& monster, BattleTurnResult result)
         checkProgressMilestones();
         cout << tr("Campaign progress: ", "Progression de campagne : ")
              << getRegionKeyCount() << tr("/4 keys secured.\n", "/4 cles securisees.\n");
+        if (hasReachedEnding() && !m_endingDisplayed)
+        {
+            displayEndingAndExit();
+        }
         break;
     case BattleTurnResult::PLAYER_WON_SPARE:
         cout << tr("You spare ", "Tu epargnes ") << monster.getName() << ".\n";
@@ -2012,6 +2122,10 @@ void Game::concludeBattle(const Monster& monster, BattleTurnResult result)
         checkProgressMilestones();
         cout << tr("Campaign progress: ", "Progression de campagne : ")
              << getRegionKeyCount() << tr("/4 keys secured.\n", "/4 cles securisees.\n");
+        if (hasReachedEnding() && !m_endingDisplayed)
+        {
+            displayEndingAndExit();
+        }
         break;
     case BattleTurnResult::PLAYER_FLED:
         cout << tr("You retreat for now. No victory is counted.\n",
@@ -4453,33 +4567,57 @@ void Game::startBattle()
 
 bool Game::hasReachedEnding() const
 {
+    if (m_endingPreviewMode)
+    {
+        return m_player.getVictories() >= getEndingTargetCount();
+    }
+
     return isEncounterCleared("NullSaint");
+}
+
+int Game::getEndingTargetCount() const
+{
+    return m_endingPreviewMode ? 2 : static_cast<int>(getCampaignOrderedMonsterIndices().size());
 }
 
 void Game::displayEndingAndExit()
 {
+    m_endingDisplayed = true;
+    const int clearedEncounters = static_cast<int>(m_clearedEncounters.size());
+    const int campaignEncounters = getEndingTargetCount();
+    string endingTitle;
+    string endingDescription;
+
+    if (clearedEncounters == campaignEncounters && m_player.getKills() == campaignEncounters)
+    {
+        endingTitle = tr("GENOCIDAL ENDING", "FIN GENOCIDAIRE");
+        endingDescription = tr("Every monster was killed.", "Tous les monstres ont ete tues.");
+    }
+    else if (clearedEncounters == campaignEncounters && m_player.getSpares() == campaignEncounters)
+    {
+        endingTitle = tr("PACIFIST ENDING", "FIN PACIFISTE");
+        endingDescription = tr("Every monster was spared with mercy.", "Tous les monstres ont ete epargnes avec mercy.");
+    }
+    else
+    {
+        endingTitle = tr("NEUTRAL ENDING", "FIN NEUTRE");
+        endingDescription = tr("Your journey mixed at least one kill and one mercy.",
+                               "Ton voyage a mele au moins un monstre tue et un monstre epargne.");
+    }
+
     cout << "\n=== " << tr("Final Outcome", "Issue finale") << " ===\n";
     cout << tr("All regional keys have been secured and the final boss has fallen.\n",
                "Toutes les cles regionales ont ete obtenues et le boss final est tombe.\n");
     cout << tr("Victories: ", "Victoires : ") << m_player.getVictories()
          << " | " << tr("Kills: ", "Kills : ") << m_player.getKills()
          << " | " << tr("Spares: ", "Spares : ") << m_player.getSpares() << "\n";
-
-    if (m_player.getKills() == m_player.getVictories())
-    {
-        cout << tr("Genocidal ending: every won battle ended in violence.\n",
-                   "Fin genocidaire : chaque combat gagne s'est termine dans la violence.\n");
-    }
-    else if (m_player.getSpares() == m_player.getVictories())
-    {
-        cout << tr("Pacifist ending: every won battle ended with mercy.\n",
-                   "Fin pacifiste : chaque combat gagne s'est conclu par la mercy.\n");
-    }
-    else
-    {
-        cout << tr("Neutral ending: your journey mixed combat and mercy.\n",
-                   "Fin neutre : ton voyage a mele combat et mercy.\n");
-    }
+    cout << tr("Monsters cleared: ", "Monstres termines : ")
+         << clearedEncounters << "/" << campaignEncounters << "\n";
+    cout << "\n+============================================================+\n";
+    cout << "| " << tr("ENDING TYPE", "TYPE DE FIN") << "\n";
+    cout << "| " << endingTitle << "\n";
+    cout << "| " << endingDescription << "\n";
+    cout << "+============================================================+\n";
 }
 
 unique_ptr<Monster> Game::createRandomMonster()

@@ -15,7 +15,7 @@
 class FrontendApp
 {
 public:
-    FrontendApp();
+    explicit FrontendApp(bool endingPreviewMode = false);
 
     bool initialize();
     void run();
@@ -118,6 +118,7 @@ private:
     std::string m_languageCode;
     std::string m_statusText;
     bool m_fullscreen;
+    bool m_endingPreviewMode;
     BattleAnimationState m_playerBattleAnimation;
     BattleAnimationState m_monsterBattleAnimation;
     BattleFxState m_battleFxState;
@@ -134,6 +135,8 @@ private:
     bool m_hasPendingScreenChange;
     Screen m_pendingScreen;
     std::string m_pendingScreenStatus;
+    bool m_showEndingBlock;
+    FrontendEndingViewData m_pendingEndingData;
     bool m_hasCachedBattleView;
     FrontendBattleViewData m_cachedBattleView;
     std::string m_pendingPlayerAttackId;
@@ -171,6 +174,7 @@ private:
     void renderBattle();
     void renderOverlay(const std::vector<FrontendActionButtonViewData>& options, const std::string& title);
     void renderTransitionOverlay();
+    void renderGameEndingBlock();
     void renderBattleEnvironment(const std::string& regionName,
                                  const std::string& elementType,
                                  const std::string& category,
